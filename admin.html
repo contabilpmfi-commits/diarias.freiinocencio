@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Painel de Diárias</title>
+
+<style>
+body { font-family: Arial; background:#eef2f7; padding:20px;}
+.topo { background:#0d3b66; color:white; padding:15px; margin-bottom:20px;}
+
+input, select {
+  padding:8px;
+  margin:5px;
+}
+
+table { width:100%; border-collapse:collapse; background:white;}
+th,td { padding:10px; border:1px solid #ccc;}
+th { background:#0d3b66; color:white;}
+
+button { padding:5px 10px; margin:2px; cursor:pointer;}
+.aprovar { background:green; color:white;}
+.reprovar { background:red; color:white;}
+</style>
+
+</head>
+
+<body>
+
+<script>
+var senha = prompt("Acesso restrito - Digite a senha:");
+if(senha !== "frei123"){
+  alert("Acesso negado");
+  document.body.innerHTML="";
+}
+</script>
+
+<div class="topo">
+<h2>Painel de Diárias</h2>
+</div>
+
+<input id="busca" placeholder="Buscar nome...">
+<select id="filtro">
+<option value="">Todas Secretarias</option>
+<option>Saúde</option>
+<option>Educação</option>
+<option>Administração</option>
+</select>
+
+<table id="tabela"></table>
+
+<script>
+var URL = "https://script.google.com/macros/s/AKfycbwVRTUjfHdFMoF3xF-52wsZGHNPfFI1nhGWafDo9J_iFVGSDz3McqZFVafjl1FRAol4Jw/exec";
+
+function carregar(){
+fetch(URL)
+.then(r=>r.json())
+.then(dados=>{
+
+let busca = document.getElementById("busca").value.toLowerCase();
+let filtro = document.getElementById("filtro").value;
+
+let html="<tr><th>Nº</th><th>Nome</th><th>Secretaria</th><th>Destino</th><th>Status</th><th>Ações</th></tr>";
+
+dados.slice(1).forEach(l=>{
+
+if(busca && !l[2].toLowerCase().includes(busca)) return;
+if(filtro && l[4] != filtro) return;
+
+html+=`<tr>
+<td>${l[0]}</td>
+<td>${l[2]}</td>
+<td>${l[4]}</td>
+<td>${l[5]}</td>
+<td>${l[6]}</td>
+<td>
+<button class="aprovar" onclick="aprovar(${l[0]})">Aprovar</button>
+<button class="reprovar" onclick="reprovar(${l[0]})">Reprovar</button>
+</td>
+</tr>`;
+});
+
+document.getElementById("tabela").innerHTML=html;
+
+});
+}
+
+function aprovar(id){
+fetch(URL+"?acao=aprovar&id="+id).then(()=>carregar());
+}
+
+function reprovar(id){
+fetch(URL+"?acao=reprovar&id="+id).then(()=>carregar());
+}
+
+document.getElementById("busca").onkeyup = carregar;
+document.getElementById("filtro").onchange = carregar;
+
+carregar();
+</script>
+
+</body>
+</html>
