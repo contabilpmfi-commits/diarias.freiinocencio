@@ -85,13 +85,34 @@ document.getElementById("tabela").innerHTML=html;
 }
 
 function aprovar(id){
-fetch(URL+"?acao=aprovar&id="+id).then(()=>carregar());
+  fetch(URL + "?acao=aprovar&id=" + id)
+  .then(res => res.text())
+  .then(res => {
+    console.log("Resposta:", res);
+    alert("Diária aprovada!");
+    carregar();
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Erro ao aprovar!");
+  });
 }
 
 function reprovar(id){
-fetch(URL+"?acao=reprovar&id="+id).then(()=>carregar());
+  fetch(URL + "?acao=reprovar&id=" + id)
+  .then(res => res.text())
+  .then(res => {
+    console.log("Resposta:", res);
+    alert("Diária reprovada!");
+    carregar();
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Erro ao reprovar!");
+  });
 }
 
+// 🔥 ESSAS 3 LINHAS FALTAVAM
 document.getElementById("busca").onkeyup = carregar;
 document.getElementById("filtro").onchange = carregar;
 
