@@ -163,24 +163,27 @@ document.getElementById("form").addEventListener("submit", function(e){
 
   const dados = Object.fromEntries(new FormData(this));
 
-  fetch("SEU_LINK_AQUI", {
-    method: "POST",
-    body: new URLSearchParams(dados)
-  })
-  .then(res => res.text())
-  .then(res => {
-    if(res === "OK"){
-      alert("Solicitação enviada com sucesso!");
-      document.getElementById("form").reset();
-    } else {
-      alert("Erro ao enviar (resposta inválida)");
-    }
-  })
-  .catch(err => {
-    alert("Erro ao enviar!");
-    console.error(err);
-  });
+ fetch("https://script.google.com/macros/s/AKfycbwaNkKZrNyBrbkB7D5U89g2h9SaDAfqXHAQAmBB3aGm2rKTiAOUuTkaW_W0tEoNrD0gaw/exec", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(dados)
+})
+.then(res => res.text())
+.then(res => {
+  console.log("RESPOSTA:", res);
 
+  if(res === "OK"){
+    alert("Solicitação enviada com sucesso!");
+    document.getElementById("form").reset();
+  } else {
+    alert("Erro ao enviar!");
+  }
+})
+.catch(err => {
+  console.error(err);
+  alert("Erro ao enviar!");
 });
 </script>
 
