@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Visualizar Diária</title>
+
+<style>
+body { font-family: Arial; background:#eef2f7; padding:20px;}
+.card { background:white; padding:20px; border-radius:10px; margin-bottom:20px;}
+button { padding:10px; margin:5px; cursor:pointer;}
+.aprovar { background:green; color:white;}
+.reprovar { background:red; color:white;}
+.excluir { background:black; color:white;}
+</style>
+
+</head>
+
+<body>
+
+<h2>Detalhes da Solicitação</h2>
+
+<div id="dados" class="card"></div>
+
+<div class="card">
+<button class="aprovar" onclick="aprovar()">Aprovar</button>
+<button class="reprovar" onclick="reprovar()">Reprovar</button>
+<button class="excluir" onclick="excluir()">Excluir</button>
+</div>
+
+<script>
+
+var URL = "https://script.google.com/macros/s/AKfycbwaNkKZrNyBrbkB7D5U89g2h9SaDAfqXHAQAmBB3aGm2rKTiAOUuTkaW_W0tEoNrD0gaw/exec";
+
+var params = new URLSearchParams(window.location.search);
+var id = params.get("id");
+
+function carregar(){
+
+fetch(URL)
+.then(r=>r.json())
+.then(dados=>{
+
+let linha = dados.find(l => l[0] == id);
+
+document.getElementById("dados").innerHTML = `
+<b>Nome:</b> ${linha[2]} <br>
+<b>CPF:</b> ${linha[3]} <br>
+<b>Secretaria:</b> ${linha[4]} <br>
+<b>Destino:</b> ${linha[5]} <br>
+<b>Saída:</b> ${linha[6]} <br>
+<b>Chegada:</b> ${linha[7]} <br>
+<b>Objetivo:</b> ${linha[8]} <br>
+<b>Status:</b> ${linha[9]} <br>
+`;
+
+});
+
+}
+
+function aprovar(){
+fetch(URL+"?acao=aprovar&id="+id)
+.then(()=>alert("Aprovado!"));
+}
+
+function reprovar(){
+let motivo = prompt("Motivo:");
+fetch(URL+"?acao=reprovar&id="+id+"&motivo="+encodeURIComponent(motivo))
+.then(()=>alert("Reprovado!"));
+}
+
+function excluir(){
+fetch(URL+"?acao=excluir&id="+id)
+.then(()=>{
+  alert("Excluído!");
+  window.location.href = "admin.html";
+});
+}
+
+carregar();
+
+</script>
+
+</body>
+</html>
