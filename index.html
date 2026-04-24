@@ -163,7 +163,7 @@ document.getElementById("form").addEventListener("submit", function(e){
 
   const dados = Object.fromEntries(new FormData(this));
 
-  fetch("https://script.google.com/macros/s/AKfycbwVRTUjfHdFMoF3xF-52wsZGHNPfFI1nhGWafDo9J_iFVGSDz3McqZFVafjl1FRAol4Jw/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbwaNkKZrNyBrbkB7D5U89g2h9SaDAfqXHAQAmBB3aGm2rKTiAOUuTkaW_W0tEoNrD0gaw/exec", {
     method: "POST",
     mode: "no-cors",
     body: new URLSearchParams(dados)
