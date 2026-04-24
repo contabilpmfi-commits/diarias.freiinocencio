@@ -18,8 +18,7 @@ th,td { padding:10px; border:1px solid #ccc;}
 th { background:#0d3b66; color:white;}
 
 button { padding:5px 10px; margin:2px; cursor:pointer;}
-.aprovar { background:green; color:white;}
-.reprovar { background:red; color:white;}
+.visualizar { background:#145da0; color:white;}
 .excluir { background:black; color:white;}
 </style>
 </head>
@@ -44,6 +43,7 @@ if(senha !== "frei123"){
 <option>Saúde</option>
 <option>Educação</option>
 <option>Administração</option>
+<option>FAZENDA</option>
 </select>
 
 <table id="tabela"></table>
@@ -72,11 +72,10 @@ html+=`<tr>
 <td>${l[2]}</td>
 <td>${l[4]}</td>
 <td>${l[5]}</td>
-<td>${l[6]}</td>
+<td>${l[9]}</td> <!-- STATUS CORRIGIDO -->
 <td>
-<button class="aprovar" onclick="acao(${l[0]},'aprovar')">Aprovar</button>
-<button class="reprovar" onclick="acao(${l[0]},'reprovar')">Reprovar</button>
-<button class="excluir" onclick="acao(${l[0]},'excluir')">Excluir</button>
+<button class="visualizar" onclick="visualizar(${l[0]})">👁</button>
+<button class="excluir" onclick="excluir(${l[0]})">🗑</button>
 </td>
 </tr>`;
 });
@@ -86,22 +85,27 @@ document.getElementById("tabela").innerHTML=html;
 });
 }
 
-function acao(id, tipo){
-
-if(tipo == "reprovar"){
-  var motivo = prompt("Motivo da reprovação:");
-  fetch(URL+"?acao=reprovar&id="+id+"&motivo="+encodeURIComponent(motivo))
-  .then(()=>carregar());
-  return;
+// 🔥 ABRE A TELA DE DETALHES
+function visualizar(id){
+  window.location.href = "visualizar.html?id=" + id;
 }
 
-fetch(URL+"?acao="+tipo+"&id="+id)
-.then(()=>carregar());
+// 🔥 EXCLUI
+function excluir(id){
+  if(confirm("Deseja excluir esta solicitação?")){
+    fetch(URL+"?acao=excluir&id="+id)
+    .then(()=>{
+      alert("Excluído com sucesso!");
+      carregar();
+    });
+  }
 }
 
+// filtros
 document.getElementById("busca").onkeyup = carregar;
 document.getElementById("filtro").onchange = carregar;
 
+// iniciar
 carregar();
 
 </script>
