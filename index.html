@@ -159,17 +159,15 @@ document.getElementById("form").addEventListener("submit", function(e){
   const dados = Object.fromEntries(new FormData(this));
 
   fetch("https://script.google.com/macros/s/AKfycbwVRTUjfHdFMoF3xF-52wsZGHNPfFI1nhGWafDo9J_iFVGSDz3McqZFVafjl1FRAol4Jw/exec", {
-    method: "POST",
-    mode: "no-cors",
-    body: JSON.stringify(dados)
-  })
-  .then(() => {
-    alert("Solicitação enviada com sucesso!");
-    document.getElementById("form").reset();
-  })
-  .catch(() => {
-    alert("Erro ao enviar!");
-  });
+  method: "POST",
+  body: new URLSearchParams(dados)
+})
+.then(() => {
+  alert("Solicitação enviada com sucesso!");
+  document.getElementById("form").reset();
+})
+.catch(() => {
+  alert("Erro ao enviar!");
 });
 </script>
 
