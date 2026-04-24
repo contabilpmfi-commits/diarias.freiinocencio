@@ -84,18 +84,56 @@ document.getElementById("tabela").innerHTML=html;
 });
 }
 
-function aprovar(id){
-  fetch(URL + "?acao=aprovar&id=" + id)
-  .then(res => res.text())
-  .then(res => {
-    console.log("Resposta:", res);
-    alert("Diária aprovada!");
-    carregar();
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Erro ao aprovar!");
-  });
+function aprovar(id) {
+  var planilha = SpreadsheetApp.openById(ID_PLANILHA);
+  var aba = planilha.getSheets()[0];
+  var dados = aba.getDataRange().getValues();
+
+  for (var i = 1; i < dados.length; i++) {
+    if (dados[i][0] == id) {
+
+      // ✅ Atualiza status
+      aba.getRange(i+1,7).setValue("APROVADO");
+
+      var numero = dados[i][0];
+      var nome = dados[i][2];
+      var cpf = dados[i][3];
+      var secretaria = dados[i][4];
+      var destino = dados[i][5];
+
+      var hoje = new Date();
+      var dia = hoje.getDate();
+      var mes = hoje.toLocaleString('pt-BR', { month: 'long' });
+
+      // 📄 GERAR DOCUMENTO
+      var template = DriveApp.getFileById(ID_DOC);
+      var copia = template.makeCopy("DIARIA Nº " + numero + " - " + nome);
+
+      var doc = DocumentApp.openById(copia.getId());
+      var body = doc.getBody();
+
+      body.replaceText("{{nome}}", nome);
+      body.replaceText("{{cpf}}", cpf);
+      body.replaceText("{{secretaria}}", secretaria);
+      body.replaceText("{{destino}}", destino);
+      body.replaceText("{{dia}}", dia.toString());
+      body.replaceText("{{mes}}", mes);
+
+      doc.saveAndClose();
+
+      // 📧 GERAR PDF E ENVIAR
+      var pdf = DriveApp.getFileById(doc.getId()).getAs("application/pdf");
+
+      MailApp.sendEmail({
+        to: "contabilidade@freiinocencio.mg.gov.br",
+        subject: "Diária Nº " + numero + " Aprovada",
+        body: "Diária aprovada de " + nome,
+        attachments: [pdf]
+      });
+
+      break;
+    }
+  }
 }
 
 function reprovar(id){
