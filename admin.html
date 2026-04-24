@@ -20,8 +20,8 @@ th { background:#0d3b66; color:white;}
 button { padding:5px 10px; margin:2px; cursor:pointer;}
 .aprovar { background:green; color:white;}
 .reprovar { background:red; color:white;}
+.excluir { background:black; color:white;}
 </style>
-
 </head>
 
 <body>
@@ -49,6 +49,7 @@ if(senha !== "frei123"){
 <table id="tabela"></table>
 
 <script>
+
 var URL = "https://script.google.com/macros/s/AKfycbwaNkKZrNyBrbkB7D5U89g2h9SaDAfqXHAQAmBB3aGm2rKTiAOUuTkaW_W0tEoNrD0gaw/exec";
 
 function carregar(){
@@ -63,7 +64,7 @@ let html="<tr><th>Nº</th><th>Nome</th><th>Secretaria</th><th>Destino</th><th>St
 
 dados.slice(1).forEach(l=>{
 
-if(busca && !l[2].toLowerCase().includes(busca)) return;
+if(busca && (!l[2] || !l[2].toLowerCase().includes(busca))) return;
 if(filtro && l[4] != filtro) return;
 
 html+=`<tr>
@@ -71,10 +72,11 @@ html+=`<tr>
 <td>${l[2]}</td>
 <td>${l[4]}</td>
 <td>${l[5]}</td>
-<td>${l[6]}</td>
+<td>${l[9]}</td>
 <td>
-<button class="aprovar" onclick="aprovar(${l[0]})">Aprovar</button>
-<button class="reprovar" onclick="reprovar(${l[0]})">Reprovar</button>
+<button class="aprovar" onclick="acao(${l[0]},'aprovar')">Aprovar</button>
+<button class="reprovar" onclick="acao(${l[0]},'reprovar')">Reprovar</button>
+<button class="excluir" onclick="acao(${l[0]},'excluir')">Excluir</button>
 </td>
 </tr>`;
 });
@@ -84,77 +86,24 @@ document.getElementById("tabela").innerHTML=html;
 });
 }
 
-function aprovar(id) {
-  var planilha = SpreadsheetApp.openById(ID_PLANILHA);
-  var aba = planilha.getSheets()[0];
-  var dados = aba.getDataRange().getValues();
+function acao(id, tipo){
 
-  for (var i = 1; i < dados.length; i++) {
-    if (dados[i][0] == id) {
-
-      // ✅ Atualiza status
-      aba.getRange(i+1,7).setValue("APROVADO");
-
-      var numero = dados[i][0];
-      var nome = dados[i][2];
-      var cpf = dados[i][3];
-      var secretaria = dados[i][4];
-      var destino = dados[i][5];
-
-      var hoje = new Date();
-      var dia = hoje.getDate();
-      var mes = hoje.toLocaleString('pt-BR', { month: 'long' });
-
-      // 📄 GERAR DOCUMENTO
-      var template = DriveApp.getFileById(ID_DOC);
-      var copia = template.makeCopy("DIARIA Nº " + numero + " - " + nome);
-
-      var doc = DocumentApp.openById(copia.getId());
-      var body = doc.getBody();
-
-      body.replaceText("{{nome}}", nome);
-      body.replaceText("{{cpf}}", cpf);
-      body.replaceText("{{secretaria}}", secretaria);
-      body.replaceText("{{destino}}", destino);
-      body.replaceText("{{dia}}", dia.toString());
-      body.replaceText("{{mes}}", mes);
-
-      doc.saveAndClose();
-
-      // 📧 GERAR PDF E ENVIAR
-      var pdf = DriveApp.getFileById(doc.getId()).getAs("application/pdf");
-
-      MailApp.sendEmail({
-        to: "contabilidade@freiinocencio.mg.gov.br",
-        subject: "Diária Nº " + numero + " Aprovada",
-        body: "Diária aprovada de " + nome,
-        attachments: [pdf]
-      });
-
-      break;
-    }
-  }
+if(tipo == "reprovar"){
+  var motivo = prompt("Motivo da reprovação:");
+  fetch(URL+"?acao=reprovar&id="+id+"&motivo="+encodeURIComponent(motivo))
+  .then(()=>carregar());
+  return;
 }
 
-function reprovar(id){
-  fetch(URL + "?acao=reprovar&id=" + id)
-  .then(res => res.text())
-  .then(res => {
-    console.log("Resposta:", res);
-    alert("Diária reprovada!");
-    carregar();
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Erro ao reprovar!");
-  });
+fetch(URL+"?acao="+tipo+"&id="+id)
+.then(()=>carregar());
 }
 
-// 🔥 ESSAS 3 LINHAS FALTAVAM
 document.getElementById("busca").onkeyup = carregar;
 document.getElementById("filtro").onchange = carregar;
 
 carregar();
+
 </script>
 
 </body>
