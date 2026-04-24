@@ -164,20 +164,19 @@ document.getElementById("form").addEventListener("submit", function(e){
   const dados = Object.fromEntries(new FormData(this));
 
   fetch("https://script.google.com/macros/s/AKfycbwVRTUjfHdFMoF3xF-52wsZGHNPfFI1nhGWafDo9J_iFVGSDz3McqZFVafjl1FRAol4Jw/exec", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(dados)
-  })
-  .then(() => {
-    alert("Solicitação enviada com sucesso!");
-    document.getElementById("form").reset();
-  })
-  .catch((erro) => {
-    console.error(erro);
-    alert("Erro ao enviar! Verifique permissões do Apps Script.");
-  });
+  method: "POST",
+  mode: "no-cors",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(dados)
+})
+.then(() => {
+  alert("Solicitação enviada com sucesso!");
+  document.getElementById("form").reset();
+})
+.catch(() => {
+  alert("Erro ao enviar!");
 });
 </script>
 
