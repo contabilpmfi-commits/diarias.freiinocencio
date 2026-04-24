@@ -1,67 +1,33 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solicitação de Diária</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-<style>
-body { font-family:'Poppins'; background:#eef2f7; margin:0; }
-.header { background:#0d3b66; color:white; padding:20px; display:flex; align-items:center;}
-.header img { height:60px; margin-right:10px;}
-.card { background:white; margin:15px auto; padding:20px; width:90%; max-width:900px; border-radius:10px;}
-.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px;}
-input,textarea { width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;}
-button { background:#2a9d8f; color:white; padding:15px; border:none; width:90%; margin:20px auto; display:block; border-radius:10px;}
-.footer { background:#0d3b66; color:white; text-align:center; padding:10px;}
-</style>
+<title>Painel</title>
 </head>
 
 <body>
 
-<div class="header">
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Brasao_de_Minas_Gerais.svg/1200px-Brasao_de_Minas_Gerais.svg.png">
-<div>
-<h2>PREFEITURA MUNICIPAL DE FREI INOCÊNCIO</h2>
-</div>
-</div>
+<h2>Painel de Diárias</h2>
 
-<form id="form">
-
-<div class="card">
-<h3>Servidor</h3>
-<div class="grid">
-<input name="nome" required placeholder="Nome">
-<input name="cpf" required placeholder="CPF">
-<input name="secretaria" placeholder="Secretaria">
-<input name="destino" placeholder="Destino">
-</div>
-</div>
-
-<button type="submit">Enviar Solicitação</button>
-
-</form>
-
-<div class="footer">
-Prefeitura de Frei Inocêncio
-</div>
+<table border="1" id="tabela"></table>
 
 <script>
-document.getElementById("form").addEventListener("submit", function(e){
-  e.preventDefault();
+var URL = "https://script.google.com/macros/s/AKfycbwVRTUjfHdFMoF3xF-52wsZGHNPfFI1nhGWafDo9J_iFVGSDz3McqZFVafjl1FRAol4Jw/exec";
 
-  const dados = Object.fromEntries(new FormData(this));
-
-  fetch("https://script.google.com/macros/s/AKfycbwVRTUjfHdFMoF3xF-52wsZGHNPfFI1nhGWafDo9J_iFVGSDz3McqZFVafjl1FRAol4Jw/exec", {
-    method: "POST",
-    mode: "no-cors",
-    body: new URLSearchParams(dados)
-  });
-
-  alert("Solicitação enviada!");
-  this.reset();
+fetch(URL)
+.then(r=>r.json())
+.then(dados=>{
+let html="";
+dados.forEach(l=>{
+html+=`<tr>
+<td>${l[0]}</td>
+<td>${l[2]}</td>
+<td>${l[4]}</td>
+<td>${l[5]}</td>
+<td>${l[6]}</td>
+</tr>`;
+});
+document.getElementById("tabela").innerHTML=html;
 });
 </script>
 
