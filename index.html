@@ -164,30 +164,31 @@ document.getElementById("form").addEventListener("submit", function(e){
 
   const botao = document.getElementById("btnEnviar");
 
-  // 🔒 BLOQUEIA CLIQUE DUPLO
+  // 🔒 trava botão
   botao.disabled = true;
   botao.innerText = "⏳ Enviando...";
 
   const form = new FormData(this);
 
+  // 🔥 GARANTE QUE DATA E HORA NÃO MISTUREM
   const dados = {
-    nome: form.get("nome"),
-    cpf: form.get("cpf"),
-    cargo: form.get("cargo"),
-    secretaria: form.get("secretaria"),
-    pix: form.get("pix"),
-    destino: form.get("destino"),
-    uf: form.get("uf"),
-    data_saida: form.get("data_saida"),
-    hora_saida: form.get("hora_saida"),
-    data_chegada: form.get("data_chegada"),
-    hora_chegada: form.get("hora_chegada"),
-    objetivo: form.get("objetivo"),
-    observacoes: form.get("observacoes"),
-    secretario_responsavel: form.get("secretario_responsavel")
+    nome: form.get("nome") || "",
+    cpf: form.get("cpf") || "",
+    cargo: form.get("cargo") || "",
+    secretaria: form.get("secretaria") || "",
+    pix: form.get("pix") || "",
+    destino: form.get("destino") || "",
+    uf: form.get("uf") || "",
+    data_saida: form.get("data_saida") || "",
+    hora_saida: form.get("hora_saida") || "",
+    data_chegada: form.get("data_chegada") || "",
+    hora_chegada: form.get("hora_chegada") || "",
+    objetivo: form.get("objetivo") || "",
+    observacoes: form.get("observacoes") || "",
+    secretario_responsavel: form.get("secretario_responsavel") || ""
   };
 
-  // ✅ VALIDAÇÃO
+  // ✅ validação
   if(!dados.nome || !dados.cpf || !dados.destino){
     alert("Preencha Nome, CPF e Destino!");
 
@@ -202,6 +203,8 @@ document.getElementById("form").addEventListener("submit", function(e){
   })
   .then(res => res.text())
   .then(res => {
+
+    console.log("RESPOSTA:", res);
 
     if(res === "OK"){
       alert("✅ Solicitação enviada com sucesso!");
