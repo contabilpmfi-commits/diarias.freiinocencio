@@ -5,12 +5,37 @@
 <title>Visualizar Diária</title>
 
 <style>
-body { font-family: Arial; background:#eef2f7; padding:20px;}
-.card { background:white; padding:20px; border-radius:10px; margin-bottom:20px;}
-button { padding:10px; margin:5px; cursor:pointer;}
-.aprovar { background:green; color:white;}
-.reprovar { background:red; color:white;}
-.excluir { background:black; color:white;}
+body {
+  font-family: Arial;
+  background:#eef2f7;
+  padding:20px;
+}
+
+.card {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+h2 {
+  color:#0d3b66;
+}
+
+button {
+  padding:10px 15px;
+  margin:5px;
+  cursor:pointer;
+  border:none;
+  border-radius:6px;
+}
+
+.aprovar { background:green; color:white; }
+.reprovar { background:red; color:white; }
+.excluir { background:black; color:white; }
+.voltar { background:#145da0; color:white; }
+
 </style>
 
 </head>
@@ -19,63 +44,128 @@ button { padding:10px; margin:5px; cursor:pointer;}
 
 <h2>Detalhes da Solicitação</h2>
 
-<div id="dados" class="card"></div>
+<div id="dados" class="card">
+Carregando...
+</div>
 
 <div class="card">
-<button class="aprovar" onclick="aprovar()">Aprovar</button>
-<button class="reprovar" onclick="reprovar()">Reprovar</button>
-<button class="excluir" onclick="excluir()">Excluir</button>
+<button class="aprovar" onclick="aprovar()">✔ Aprovar</button>
+<button class="reprovar" onclick="reprovar()">✖ Reprovar</button>
+<button class="excluir" onclick="excluir()">🗑 Excluir</button>
+<button class="voltar" onclick="voltar()">⬅ Voltar</button>
 </div>
 
 <script>
 
 var URL = "https://script.google.com/macros/s/AKfycbwaNkKZrNyBrbkB7D5U89g2h9SaDAfqXHAQAmBB3aGm2rKTiAOUuTkaW_W0tEoNrD0gaw/exec";
 
+// pega ID da URL
 var params = new URLSearchParams(window.location.search);
 var id = params.get("id");
 
+// 🔥 CARREGAR DADOS
 function carregar(){
 
 fetch(URL)
 .then(r=>r.json())
 .then(dados=>{
 
-let linha = dados.find(l => l[0] == id);
+let item = dados.find(l => l[0] == id);
+
+if(!item){
+  document.getElementById("dados").innerHTML = "Registro não encontrado";
+  return;
+}
 
 document.getElementById("dados").innerHTML = `
-<b>Nome:</b> ${linha[2]} <br>
-<b>CPF:</b> ${linha[3]} <br>
-<b>Secretaria:</b> ${linha[4]} <br>
-<b>Destino:</b> ${linha[5]} <br>
-<b>Saída:</b> ${linha[6]} <br>
-<b>Chegada:</b> ${linha[7]} <br>
-<b>Objetivo:</b> ${linha[8]} <br>
-<b>Status:</b> ${linha[9]} <br>
+<b>Nº:</b> ${item[0]}<br><br>
+<b>Nome:</b> ${item[2]}<br>
+<b>CPF:</b> ${item[3]}<br>
+<b>Secretaria:</b> ${item[4]}<br>
+<b>Destino:</b> ${item[5]}<br><br>
+
+<b>Saída:</b> ${item[6]}<br>
+<b>Retorno:</b> ${item[7]}<br><br>
+
+<b>Objetivo:</b><br>${item[8]}<br><br>
+
+<b>Status:</b> ${item[9]}<br>
+<b>Motivo:</b> ${item[10] || "-"}<br>
 `;
 
+})
+.catch(err=>{
+  console.error(err);
+  document.getElementById("dados").innerHTML = "Erro ao carregar dados";
 });
 
 }
 
+// 🔥 APROVAR
 function aprovar(){
+
 fetch(URL+"?acao=aprovar&id="+id)
-.then(()=>alert("Aprovado!"));
+.then(res => res.text())
+.then(res => {
+
+  console.log("RESPOSTA:", res);
+
+  alert("Diária aprovada com sucesso!");
+
+  carregar(); // atualiza dados
+
+})
+.catch(err => {
+  console.error(err);
+  alert("Erro ao aprovar!");
+});
+
 }
 
+// 🔥 REPROVAR
 function reprovar(){
-let motivo = prompt("Motivo:");
+
+var motivo = prompt("Motivo da reprovação:");
+
+if(!motivo) return;
+
 fetch(URL+"?acao=reprovar&id="+id+"&motivo="+encodeURIComponent(motivo))
-.then(()=>alert("Reprovado!"));
+.then(res => res.text())
+.then(res => {
+
+  alert("Diária reprovada!");
+
+  carregar();
+
+})
+.catch(err => {
+  console.error(err);
+  alert("Erro ao reprovar!");
+});
+
 }
 
+// 🔥 EXCLUIR
 function excluir(){
+
+if(confirm("Deseja excluir esta solicitação?")){
+
 fetch(URL+"?acao=excluir&id="+id)
 .then(()=>{
-  alert("Excluído!");
+  alert("Excluído com sucesso!");
   window.location.href = "admin.html";
 });
+
 }
 
+}
+
+// 🔙 VOLTAR
+function voltar(){
+  window.location.href = "admin.html";
+}
+
+// iniciar
 carregar();
 
 </script>
