@@ -104,25 +104,19 @@ button:hover {
 
 <form id="form">
 
-<!-- IDENTIFICAÇÃO -->
 <div class="card">
 <h3>1. Identificação do Servidor</h3>
 <div class="grid">
 <input name="nome" placeholder="Nome completo" required>
 <input name="cpf" placeholder="CPF" required>
-<input name="cargo" placeholder="Cargo / Função">
 <input name="secretaria" placeholder="Secretaria">
-<input name="pix" placeholder="Chave PIX">
 </div>
 </div>
 
-<!-- VIAGEM -->
 <div class="card">
 <h3>2. Viagem</h3>
 <div class="grid">
-<input name="origem" value="Frei Inocêncio">
-<input name="destino" placeholder="Destino">
-<input name="uf" placeholder="UF">
+<input name="destino" placeholder="Destino" required>
 <input type="date" name="data_saida">
 <input type="time" name="hora_saida">
 <input type="date" name="data_chegada">
@@ -130,21 +124,9 @@ button:hover {
 </div>
 </div>
 
-<!-- OBJETIVO -->
 <div class="card">
 <h3>3. Objetivo da Viagem</h3>
 <textarea name="objetivo"></textarea>
-</div>
-
-<!-- OBS -->
-<div class="card">
-<h3>4. Observações</h3>
-<textarea name="observacoes"></textarea>
-</div>
-
-<!-- SECRETÁRIO -->
-<div class="card">
-<input name="secretario_responsavel" placeholder="Secretário Responsável">
 </div>
 
 <button type="submit">🚀 Enviar Solicitação</button>
@@ -161,7 +143,30 @@ contabilidade@freiinocencio.mg.gov.br
 document.getElementById("form").addEventListener("submit", function(e){
   e.preventDefault();
 
-  const dados = Object.fromEntries(new FormData(this));
+  const form = new FormData(this);
+
+  const data_saida = form.get("data_saida");
+  const hora_saida = form.get("hora_saida") || "00:00";
+
+  const data_chegada = form.get("data_chegada");
+  const hora_chegada = form.get("hora_chegada") || "00:00";
+
+  const dados = {
+    nome: form.get("nome"),
+    cpf: form.get("cpf"),
+    secretaria: form.get("secretaria"),
+    destino: form.get("destino"),
+    objetivo: form.get("objetivo"),
+
+    data_saida: data_saida ? data_saida + " " + hora_saida : "",
+    data_chegada: data_chegada ? data_chegada + " " + hora_chegada : ""
+  };
+
+  // 🔥 validação mínima
+  if(!dados.nome || !dados.cpf || !dados.destino){
+    alert("Preencha Nome, CPF e Destino!");
+    return;
+  }
 
   fetch("https://script.google.com/macros/s/AKfycbwaNkKZrNyBrbkB7D5U89g2h9SaDAfqXHAQAmBB3aGm2rKTiAOUuTkaW_W0tEoNrD0gaw/exec", {
     method: "POST",
@@ -169,18 +174,20 @@ document.getElementById("form").addEventListener("submit", function(e){
   })
   .then(res => res.text())
   .then(res => {
+
     console.log("RESPOSTA:", res);
 
     if(res === "OK"){
-      alert("Solicitação enviada com sucesso!");
+      alert("✅ Solicitação enviada com sucesso!");
       document.getElementById("form").reset();
     } else {
-      alert("Erro ao enviar!");
+      alert("❌ Erro ao enviar!");
     }
+
   })
   .catch(err => {
     console.error(err);
-    alert("Erro ao enviar!");
+    alert("❌ Erro de conexão!");
   });
 
 });
