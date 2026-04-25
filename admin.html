@@ -1,140 +1,231 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Painel de Diárias</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solicitação de Diária</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-body { font-family: Arial; background:#eef2f7; padding:20px;}
-.topo { background:#0d3b66; color:white; padding:15px; margin-bottom:20px;}
-
-input, select {
-  padding:8px;
-  margin:5px;
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  background: #eef2f7;
 }
 
-table { width:100%; border-collapse:collapse; background:white;}
-th,td { padding:10px; border:1px solid #ccc;}
-th { background:#0d3b66; color:white;}
+.header {
+  background: linear-gradient(90deg, #0d3b66, #145da0);
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+}
 
-button { padding:5px 10px; margin:2px; cursor:pointer;}
-.visualizar { background:#145da0; color:white;}
-.excluir { background:black; color:white;}
-.link { text-decoration:none; font-size:18px; }
+.header img {
+  height: 60px;
+  margin-right: 15px;
+}
 
-.loading {
-  text-align:center;
-  padding:20px;
+.title {
+  text-align: center;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  margin: 15px auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 900px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+textarea {
+  min-height: 80px;
+}
+
+button {
+  background: #2a9d8f;
+  color: white;
+  border: none;
+  padding: 15px;
+  width: 90%;
+  max-width: 900px;
+  margin: 20px auto;
+  display: block;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #21867a;
+}
+
+button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.footer {
+  background: #0d3b66;
+  color: white;
+  text-align: center;
+  padding: 15px;
 }
 </style>
+
 </head>
 
 <body>
 
-<script>
-var senha = prompt("Acesso restrito - Digite a senha:");
-if(senha !== "frei123"){
-  alert("Acesso negado");
-  document.body.innerHTML="";
-}
-</script>
-
-<div class="topo">
-<h2>Painel de Diárias</h2>
+<div class="header">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Brasao_de_Minas_Gerais.svg/1200px-Brasao_de_Minas_Gerais.svg.png">
+  <div>
+    <h2>PREFEITURA MUNICIPAL DE FREI INOCÊNCIO</h2>
+    <small>Estado de Minas Gerais</small>
+  </div>
 </div>
 
-<input id="busca" placeholder="Buscar nome...">
-<select id="filtro">
-<option value="">Todas Secretarias</option>
-<option>Saúde</option>
-<option>Educação</option>
-<option>Administração</option>
-<option>FAZENDA</option>
-</select>
+<div class="title">
+  <h2>Solicitação de Diária</h2>
+  <p>Preencha as informações abaixo</p>
+</div>
 
-<table id="tabela">
-<tr><td class="loading">Carregando...</td></tr>
-</table>
+<form id="form">
+
+<div class="card">
+<h3>1. Identificação do Servidor</h3>
+<div class="grid">
+<input name="nome" placeholder="Nome completo" required>
+<input name="cpf" placeholder="CPF" required>
+<input name="cargo" placeholder="Cargo / Função">
+<input name="secretaria" placeholder="Secretaria">
+<input name="pix" placeholder="Chave PIX">
+</div>
+</div>
+
+<div class="card">
+<h3>2. Viagem</h3>
+<div class="grid">
+<input name="destino" placeholder="Destino" required>
+<input name="uf" placeholder="UF">
+<input type="date" name="data_saida">
+<input type="time" name="hora_saida">
+<input type="date" name="data_chegada">
+<input type="time" name="hora_chegada">
+</div>
+</div>
+
+<div class="card">
+<h3>3. Objetivo da Viagem</h3>
+<textarea name="objetivo"></textarea>
+</div>
+
+<div class="card">
+<h3>4. Observações</h3>
+<textarea name="observacoes"></textarea>
+</div>
+
+<div class="card">
+<input name="secretario_responsavel" placeholder="Secretário Responsável">
+</div>
+
+<button type="submit" id="btnEnviar">🚀 Enviar Solicitação</button>
+
+</form>
+
+<div class="footer">
+Av. Dr. João de Souza Lima, 731 - Centro | Frei Inocêncio/MG  
+<br>
+contabilidade@freiinocencio.mg.gov.br
+</div>
 
 <script>
 
-var URL = "https://script.google.com/macros/s/AKfycbwaNkKZrNyBrbkB7D5U89g2h9SaDAfqXHAQAmBB3aGm2rKTiAOUuTkaW_W0tEoNrD0gaw/exec";
+document.getElementById("form").addEventListener("submit", function(e){
 
-function carregar(){
+  e.preventDefault();
 
-fetch(URL)
-.then(r=>r.json())
-.then(dados=>{
+  const botao = document.getElementById("btnEnviar");
 
-let busca = document.getElementById("busca").value.toLowerCase();
-let filtro = document.getElementById("filtro").value;
+  // 🔒 bloqueia múltiplos cliques
+  botao.disabled = true;
+  botao.innerText = "⏳ Enviando...";
 
-let html="<tr><th>Nº</th><th>Nome</th><th>Secretaria</th><th>Destino</th><th>Status</th><th>Ações</th></tr>";
+  const form = new FormData(this);
 
-dados.slice(1).forEach(l=>{
+  // 🔥 AJUSTE DE DATA + HORA (IMPORTANTE)
+  function juntarDataHora(data, hora){
+    if(!data) return "";
+    if(!hora) hora = "00:00";
+    return data + " " + hora;
+  }
 
-let nome = l[2] || "";
-let secretaria = l[4] || "";
-let destino = l[5] || "";
-let status = l[9] || "PENDENTE";
-let link = l[11] || "";
+  const dados = {
+    nome: form.get("nome"),
+    cpf: form.get("cpf"),
+    cargo: form.get("cargo"),
+    secretaria: form.get("secretaria"),
+    pix: form.get("pix"),
+    destino: form.get("destino"),
+    uf: form.get("uf"),
+    data_saida: juntarDataHora(form.get("data_saida"), form.get("hora_saida")),
+    data_chegada: juntarDataHora(form.get("data_chegada"), form.get("hora_chegada")),
+    objetivo: form.get("objetivo"),
+    observacoes: form.get("observacoes"),
+    secretario_responsavel: form.get("secretario_responsavel")
+  };
 
-if(busca && !nome.toLowerCase().includes(busca)) return;
-if(filtro && secretaria != filtro) return;
+  // ✅ validação
+  if(!dados.nome || !dados.cpf || !dados.destino){
+    alert("Preencha Nome, CPF e Destino!");
 
-html+=`<tr>
-<td>${l[0]}</td>
-<td>${nome}</td>
-<td>${secretaria}</td>
-<td>${destino}</td>
-<td><b>${status}</b></td>
-<td>
+    botao.disabled = false;
+    botao.innerText = "🚀 Enviar Solicitação";
+    return;
+  }
 
-<button class="visualizar" onclick="visualizar(${l[0]})">👁</button>
+  fetch("https://script.google.com/macros/s/AKfycbwaNkKZrNyBrbkB7D5U89g2h9SaDAfqXHAQAmBB3aGm2rKTiAOUuTkaW_W0tEoNrD0gaw/exec", {
+    method: "POST",
+    body: new URLSearchParams(dados)
+  })
+  .then(res => res.text())
+  .then(res => {
 
-${link ? `<a class="link" href="${link}" target="_blank">📄</a>` : ""}
+    if(res === "OK"){
+      alert("✅ Solicitação enviada com sucesso!");
+      document.getElementById("form").reset();
+    } else {
+      alert("❌ Erro ao enviar!");
+    }
 
-<button class="excluir" onclick="excluir(${l[0]})">🗑</button>
+  })
+  .catch(err => {
+    console.error(err);
+    alert("❌ Erro de conexão!");
+  })
+  .finally(() => {
+    botao.disabled = false;
+    botao.innerText = "🚀 Enviar Solicitação";
+  });
 
-</td>
-</tr>`;
 });
-
-document.getElementById("tabela").innerHTML=html;
-
-})
-.catch(err=>{
-  console.error(err);
-  document.getElementById("tabela").innerHTML = "<tr><td>Erro ao carregar dados</td></tr>";
-});
-
-}
-
-function visualizar(id){
-  window.location.href = "visualizar.html?id=" + id;
-}
-
-function excluir(id){
-
-if(!confirm("Deseja excluir esta solicitação?")) return;
-
-fetch(URL+"?acao=excluir&id="+id)
-.then(res => res.text())
-.then(res => {
-  console.log("Excluir:", res);
-  carregar();
-})
-.catch(err=>{
-  console.error(err);
-  alert("Erro ao excluir");
-});
-
-}
-
-document.getElementById("busca").onkeyup = carregar;
-document.getElementById("filtro").onchange = carregar;
-
-carregar();
 
 </script>
 
