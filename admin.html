@@ -21,6 +21,11 @@ button { padding:5px 10px; margin:2px; cursor:pointer;}
 .visualizar { background:#145da0; color:white;}
 .excluir { background:black; color:white;}
 .link { text-decoration:none; font-size:18px; }
+
+.loading {
+  text-align:center;
+  padding:20px;
+}
 </style>
 </head>
 
@@ -47,13 +52,16 @@ if(senha !== "frei123"){
 <option>FAZENDA</option>
 </select>
 
-<table id="tabela"></table>
+<table id="tabela">
+<tr><td class="loading">Carregando...</td></tr>
+</table>
 
 <script>
 
 var URL = "https://script.google.com/macros/s/AKfycbwaNkKZrNyBrbkB7D5U89g2h9SaDAfqXHAQAmBB3aGm2rKTiAOUuTkaW_W0tEoNrD0gaw/exec";
 
 function carregar(){
+
 fetch(URL)
 .then(r=>r.json())
 .then(dados=>{
@@ -65,20 +73,26 @@ let html="<tr><th>Nº</th><th>Nome</th><th>Secretaria</th><th>Destino</th><th>St
 
 dados.slice(1).forEach(l=>{
 
-if(busca && (!l[2] || !l[2].toLowerCase().includes(busca))) return;
-if(filtro && l[4] != filtro) return;
+let nome = l[2] || "";
+let secretaria = l[4] || "";
+let destino = l[5] || "";
+let status = l[9] || "PENDENTE";
+let link = l[11] || "";
+
+if(busca && !nome.toLowerCase().includes(busca)) return;
+if(filtro && secretaria != filtro) return;
 
 html+=`<tr>
 <td>${l[0]}</td>
-<td>${l[2]}</td>
-<td>${l[4]}</td>
-<td>${l[5]}</td>
-<td>${l[9]}</td>
+<td>${nome}</td>
+<td>${secretaria}</td>
+<td>${destino}</td>
+<td><b>${status}</b></td>
 <td>
 
 <button class="visualizar" onclick="visualizar(${l[0]})">👁</button>
 
-${l[11] ? `<a class="link" href="${l[11]}" target="_blank">📄</a>` : ""}
+${link ? `<a class="link" href="${link}" target="_blank">📄</a>` : ""}
 
 <button class="excluir" onclick="excluir(${l[0]})">🗑</button>
 
@@ -88,7 +102,12 @@ ${l[11] ? `<a class="link" href="${l[11]}" target="_blank">📄</a>` : ""}
 
 document.getElementById("tabela").innerHTML=html;
 
+})
+.catch(err=>{
+  console.error(err);
+  document.getElementById("tabela").innerHTML = "<tr><td>Erro ao carregar dados</td></tr>";
 });
+
 }
 
 function visualizar(id){
@@ -96,10 +115,20 @@ function visualizar(id){
 }
 
 function excluir(id){
-  if(confirm("Deseja excluir esta solicitação?")){
-    fetch(URL+"?acao=excluir&id="+id)
-    .then(()=>carregar());
-  }
+
+if(!confirm("Deseja excluir esta solicitação?")) return;
+
+fetch(URL+"?acao=excluir&id="+id)
+.then(res => res.text())
+.then(res => {
+  console.log("Excluir:", res);
+  carregar();
+})
+.catch(err=>{
+  console.error(err);
+  alert("Erro ao excluir");
+});
+
 }
 
 document.getElementById("busca").onkeyup = carregar;
