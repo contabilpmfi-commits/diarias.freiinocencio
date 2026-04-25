@@ -77,6 +77,11 @@ button:hover {
   background: #21867a;
 }
 
+button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
 .footer {
   background: #0d3b66;
   color: white;
@@ -109,7 +114,9 @@ button:hover {
 <div class="grid">
 <input name="nome" placeholder="Nome completo" required>
 <input name="cpf" placeholder="CPF" required>
+<input name="cargo" placeholder="Cargo / Função">
 <input name="secretaria" placeholder="Secretaria">
+<input name="pix" placeholder="Chave PIX">
 </div>
 </div>
 
@@ -117,6 +124,7 @@ button:hover {
 <h3>2. Viagem</h3>
 <div class="grid">
 <input name="destino" placeholder="Destino" required>
+<input name="uf" placeholder="UF">
 <input type="date" name="data_saida">
 <input type="time" name="hora_saida">
 <input type="date" name="data_chegada">
@@ -129,7 +137,16 @@ button:hover {
 <textarea name="objetivo"></textarea>
 </div>
 
-<button type="submit">🚀 Enviar Solicitação</button>
+<div class="card">
+<h3>4. Observações</h3>
+<textarea name="observacoes"></textarea>
+</div>
+
+<div class="card">
+<input name="secretario_responsavel" placeholder="Secretário Responsável">
+</div>
+
+<button type="submit" id="btnEnviar">🚀 Enviar Solicitação</button>
 
 </form>
 
@@ -140,31 +157,42 @@ contabilidade@freiinocencio.mg.gov.br
 </div>
 
 <script>
+
 document.getElementById("form").addEventListener("submit", function(e){
+
   e.preventDefault();
 
+  const botao = document.getElementById("btnEnviar");
+
+  // 🔒 BLOQUEIA CLIQUE DUPLO
+  botao.disabled = true;
+  botao.innerText = "⏳ Enviando...";
+
   const form = new FormData(this);
-
-  const data_saida = form.get("data_saida");
-  const hora_saida = form.get("hora_saida") || "00:00";
-
-  const data_chegada = form.get("data_chegada");
-  const hora_chegada = form.get("hora_chegada") || "00:00";
 
   const dados = {
     nome: form.get("nome"),
     cpf: form.get("cpf"),
+    cargo: form.get("cargo"),
     secretaria: form.get("secretaria"),
+    pix: form.get("pix"),
     destino: form.get("destino"),
+    uf: form.get("uf"),
+    data_saida: form.get("data_saida"),
+    hora_saida: form.get("hora_saida"),
+    data_chegada: form.get("data_chegada"),
+    hora_chegada: form.get("hora_chegada"),
     objetivo: form.get("objetivo"),
-
-    data_saida: data_saida ? data_saida + " " + hora_saida : "",
-    data_chegada: data_chegada ? data_chegada + " " + hora_chegada : ""
+    observacoes: form.get("observacoes"),
+    secretario_responsavel: form.get("secretario_responsavel")
   };
 
-  // 🔥 validação mínima
+  // ✅ VALIDAÇÃO
   if(!dados.nome || !dados.cpf || !dados.destino){
     alert("Preencha Nome, CPF e Destino!");
+
+    botao.disabled = false;
+    botao.innerText = "🚀 Enviar Solicitação";
     return;
   }
 
@@ -174,8 +202,6 @@ document.getElementById("form").addEventListener("submit", function(e){
   })
   .then(res => res.text())
   .then(res => {
-
-    console.log("RESPOSTA:", res);
 
     if(res === "OK"){
       alert("✅ Solicitação enviada com sucesso!");
@@ -188,9 +214,14 @@ document.getElementById("form").addEventListener("submit", function(e){
   .catch(err => {
     console.error(err);
     alert("❌ Erro de conexão!");
+  })
+  .finally(() => {
+    botao.disabled = false;
+    botao.innerText = "🚀 Enviar Solicitação";
   });
 
 });
+
 </script>
 
 </body>
