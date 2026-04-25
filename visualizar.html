@@ -36,6 +36,11 @@ button {
 .excluir { background:black; color:white; }
 .voltar { background:#145da0; color:white; }
 
+.link-doc {
+  display:block;
+  margin-top:10px;
+  font-size:16px;
+}
 </style>
 
 </head>
@@ -59,23 +64,25 @@ Carregando...
 
 var URL = "https://script.google.com/macros/s/AKfycbwaNkKZrNyBrbkB7D5U89g2h9SaDAfqXHAQAmBB3aGm2rKTiAOUuTkaW_W0tEoNrD0gaw/exec";
 
-// pega ID da URL
 var params = new URLSearchParams(window.location.search);
 var id = params.get("id");
 
-// 🔥 CARREGAR DADOS
+// 🔥 CARREGAR
 function carregar(){
 
 fetch(URL)
 .then(r=>r.json())
 .then(dados=>{
 
-let item = dados.find(l => l[0] == id);
+// 🔥 CORREÇÃO DO ID (ESSENCIAL)
+let item = dados.find(l => Number(l[0]) === Number(id));
 
 if(!item){
   document.getElementById("dados").innerHTML = "Registro não encontrado";
   return;
 }
+
+let linkDoc = item[11];
 
 document.getElementById("dados").innerHTML = `
 <b>Nº:</b> ${item[0]}<br><br>
@@ -89,8 +96,10 @@ document.getElementById("dados").innerHTML = `
 
 <b>Objetivo:</b><br>${item[8]}<br><br>
 
-<b>Status:</b> ${item[9]}<br>
+<b>Status:</b> <b>${item[9]}</b><br>
 <b>Motivo:</b> ${item[10] || "-"}<br>
+
+${linkDoc ? `<a class="link-doc" href="${linkDoc}" target="_blank">📄 Abrir Documento</a>` : ""}
 `;
 
 })
@@ -104,15 +113,20 @@ document.getElementById("dados").innerHTML = `
 // 🔥 APROVAR
 function aprovar(){
 
+if(!confirm("Confirmar aprovação?")) return;
+
 fetch(URL+"?acao=aprovar&id="+id)
 .then(res => res.text())
 .then(res => {
 
-  console.log("RESPOSTA:", res);
+console.log("RESPOSTA:", res);
 
-  alert("Diária aprovada com sucesso!");
-
-  carregar(); // atualiza dados
+if(res === "OK"){
+  alert("✅ Diária aprovada!");
+  carregar();
+}else{
+  alert("❌ Erro ao aprovar");
+}
 
 })
 .catch(err => {
@@ -133,9 +147,12 @@ fetch(URL+"?acao=reprovar&id="+id+"&motivo="+encodeURIComponent(motivo))
 .then(res => res.text())
 .then(res => {
 
+if(res === "OK"){
   alert("Diária reprovada!");
-
   carregar();
+}else{
+  alert("Erro ao reprovar");
+}
 
 })
 .catch(err => {
@@ -148,15 +165,14 @@ fetch(URL+"?acao=reprovar&id="+id+"&motivo="+encodeURIComponent(motivo))
 // 🔥 EXCLUIR
 function excluir(){
 
-if(confirm("Deseja excluir esta solicitação?")){
+if(!confirm("Deseja excluir esta solicitação?")) return;
 
 fetch(URL+"?acao=excluir&id="+id)
+.then(res => res.text())
 .then(()=>{
   alert("Excluído com sucesso!");
   window.location.href = "admin.html";
 });
-
-}
 
 }
 
@@ -165,7 +181,6 @@ function voltar(){
   window.location.href = "admin.html";
 }
 
-// iniciar
 carregar();
 
 </script>
